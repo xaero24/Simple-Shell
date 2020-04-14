@@ -1,8 +1,23 @@
+/*
+Michael Afonin, 310514997
+*/
+
 #ifndef SHELL_H
 #define SHELL_H
 
 /*Defining different command types*/
-
+#define PWD 1
+#define CD 2
+#define NANO 3
+#define FCAT 4
+#define CAT 5
+#define WC 6
+#define CP 7
+#define PIPE 8
+#define SORT 9
+#define GREP 10
+#define MAN 11
+#define EXIT 12
 
 /*Defining global useful vars*/
 #define TRUE 1
@@ -18,6 +33,16 @@ typedef struct
 } dataLine;
 
 /*Function definitions*/
-int parseLine(char*, dataLine*);
+void getArgs(char[10][256], char*, int);
+int parseLine(char*, int, char[10][256]);
+
+/*Parsing functions*/
+int getCommandType(char*);
+int countParameters(char*);
+
+/*Utility functions*/
+void printPWD();
+int changeDirectory(char*);
+void printManPage(char*);
 
 #endif
