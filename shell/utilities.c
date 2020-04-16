@@ -43,7 +43,7 @@ int writeToFile(char* filename)
 /*This function provides the "cat" action*/
 int readFile(char* filename)
 {
-    char line[1024], s;
+    char s;
     FILE* infile = NULL;
     infile = fopen(filename, "r");
     if(!infile)
@@ -84,6 +84,13 @@ int counter(char* filename, char* options)
         if(options[i] == 'c') charFlag = TRUE;
     }
 
+    if(!lineFlag && !wordFlag && !charFlag)
+    {
+        lineFlag = TRUE;
+        wordFlag = TRUE;
+        charFlag = TRUE;
+    }
+
     s = fgetc(infile);
     while(s != EOF)
     {
@@ -93,6 +100,10 @@ int counter(char* filename, char* options)
     }
     if (feof(infile))
     {
+        if(lineFlag) printf("l:%d ", lineCount);
+        if(wordFlag) printf("w:%d ", wordCount);
+        if(charFlag) printf("c:%d ", charCount);
+        printf("\n");
         fclose(infile); 
         return TRUE;
     }
@@ -106,7 +117,7 @@ int counter(char* filename, char* options)
 /*This function provides the "cp" action*/
 int copyFiles(char* source, char* destination)
 {
-    char line[1024], s;
+    char s;
     FILE *src = NULL, *dst = NULL;
     src = fopen(source, "r");
     dst = fopen(destination, "r");
@@ -141,10 +152,10 @@ int copyFiles(char* source, char* destination)
 /*This function provides the "grep" action*/
 int grepFile(char* filename, char* pattern, char grepFlag)
 {
-    int lineFlag = FALSE;
+    int lineFlag = FALSE, foundFlag = FALSE;
     int lineCount = 0;
-    int i = 0;
-    char s, temp[1024];
+    int i = 0, j = 0;
+    char s, temp[64], line[1024];
     FILE* infile = NULL;
     infile = fopen(filename, "r");
     if(!infile)
@@ -155,15 +166,29 @@ int grepFile(char* filename, char* pattern, char grepFlag)
     s = fgetc(infile);
     while(s != EOF)
     {
-        i = 0;
-        while(s != ' ')
+        j = 0;
+        foundFlag = FALSE;
+        while(s != EOF && s != '\n')
         {
-            temp[i] = s;
+            i = 0;
+            while(s != ' ')
+            {
+                temp[i++] = s;
+                line[j++] = s;
+                s = fgetc(infile);
+            }
+            temp[i] = '\0';
+            line[j++] = s;
             s = fgetc(infile);
+            if(strcmp(temp, pattern) == 0) foundFlag = TRUE;
         }
+        if(foundFlag) lineCount++;
+        if(!lineFlag) printf("%s\n", line);
     }
+
     if (feof(infile))
     {
+        if(lineFlag) printf("%d\n", lineCount);
         fclose(infile); 
         return TRUE;
     }

@@ -25,7 +25,7 @@ int countParameters(char* line)
 {
     int words = 1, i = 0;
     
-    while (line[i] != '\n')
+    while (line[i] != '\0')
     {
         if(line[i++] == ' ') words++;
     }
@@ -39,12 +39,13 @@ void getArgs(char args[10][256], char* line, int words)
     while(i<words)
     {
         k = 0;
-        while (line[j] != ' ' && line[j] != '\n')
+        while (line[j] != ' ' && line[j] != '\0')
         {
             args[i][k] = line[j];
             k++;
             j++;
         }
+        args[i][k] = '\0';
         j++;
         i++;
     }
