@@ -16,8 +16,11 @@ void printPWD()
 int changeDirectory(char* newDir)
 {
     int result = chdir(newDir);
-    printf("Moved to ");
-    printPWD();
+    if(result != -1)
+    {
+        printf("Moved to ");
+        printPWD();
+    }
     return result;
 }
 

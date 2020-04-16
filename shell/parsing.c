@@ -41,6 +41,16 @@ void getArgs(char args[10][256], char* line, int words)
         k = 0;
         while (line[j] != ' ' && line[j] != '\0')
         {
+            if(line[j] == "\"")
+            {
+                j++;
+                while(line[j] != "\"")
+                {
+                    args[i][k] = line[j];
+                    k++;
+                    j++;
+                }
+            }
             args[i][k] = line[j];
             k++;
             j++;

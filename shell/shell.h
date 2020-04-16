@@ -34,7 +34,7 @@ typedef struct
 
 /*Function definitions*/
 void getArgs(char[10][256], char*, int);
-int checkInput(char*, char[10][256], int, int*);
+int checkInput(char*, int, int*);
 
 /*Parsing functions*/
 int getCommandType(char*);

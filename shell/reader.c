@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include "shell.h"
 
-int checkInput(char *cmdLine, char args[10][256], int paramCount, int* exitFlag)
+int checkInput(char *cmdLine, int paramCount, int* exitFlag)
 {
     int i = 0, j = 0;
     int errorFlag = FALSE;
@@ -42,6 +42,7 @@ int checkInput(char *cmdLine, char args[10][256], int paramCount, int* exitFlag)
             {
                 printf("Cat has to be followed by > sign.\n");
                 errorFlag = TRUE;
+                break;
             }
             if(paramCount != 3)
             {
@@ -67,9 +68,9 @@ int checkInput(char *cmdLine, char args[10][256], int paramCount, int* exitFlag)
             break;
         case WC:
             /* TODO: Check input parametrs in a better way*/
-            if(paramCount != 3)
+            if(paramCount < 2 || paramCount > 3)
             {
-                printf("wc takes exactly 1 flag and 1 parameter.\n");
+                printf("wc takes 1 possible flag and 1 parameter.\n");
                 errorFlag = TRUE;
                 break;
             }
@@ -103,6 +104,22 @@ int checkInput(char *cmdLine, char args[10][256], int paramCount, int* exitFlag)
             {
                 printf("sort takes exactly 1 parameter and 1 possible flag.\n");
                 errorFlag = TRUE;
+            }if(cmdLine[i] == '-')
+            {
+                /*Read the flag*/
+                i++;
+                if(cmdLine[i] != 'c')
+                {
+                    printf("Bad flag passed: %c\n", cmdLine[i]);
+                    errorFlag = TRUE;
+                    break;
+                }
+                if(cmdLine[i+1] != ' ')
+                {
+                    printf("Only one flag is supported.\n");
+                    errorFlag = TRUE;
+                    break;
+                }
             }
             break;
         case GREP:
@@ -132,7 +149,7 @@ int checkInput(char *cmdLine, char args[10][256], int paramCount, int* exitFlag)
                 }
                 if(cmdLine[i] != 'c')
                 {
-                    printf("Unknown flag.\n");
+                    printf("Unknown flag: %c.\n", cmdLine[i]);
                     errorFlag = TRUE;
                     break;
                 }
@@ -158,6 +175,132 @@ int checkInput(char *cmdLine, char args[10][256], int paramCount, int* exitFlag)
             break;
         default:
             printf("Unknown command: %s\n", word);
+            errorFlag = TRUE;
+    }
+            
+    return errorFlag;
+}
+
+
+int executeCommand(char args[10][256], int startIndex, int endIndex)
+{
+    int i = 0, j = 0;
+    int errorFlag = FALSE;
+    char word[256];
+
+    switch(getCommandType(args[startIndex]))
+    {
+        case PWD:
+            printPWD();
+            break;
+        case CD:
+            if(changeDirectory(args[startIndex+1]) == -1)
+            {
+                printf("An error ccured while changing directory.\n");
+                errorFlag = TRUE;
+            }
+            break;
+        case FCAT:
+            if(writeToFile(args[startIndex+2]) == FALSE)
+            {
+                printf("Error writing to file %s\n", args[startIndex+2]);
+                errorFlag = TRUE;
+            }
+            break;
+        case NANO:
+            if(writeToFile(args[startIndex+1]) == FALSE)
+            {
+                printf("Error writing to file %s\n", args[startIndex+1]);
+                errorFlag = TRUE;
+            }
+            break;
+        case CAT:
+            if(readFile(args[startIndex+1]) == FALSE)
+            {
+                printf("Error reading file %s\n", args[startIndex+1]);
+                errorFlag = TRUE;
+            }
+            break;
+        case WC:
+            if(counter(args[startIndex+2], args[startIndex+1]) == FALSE)
+            {
+                printf("Error reading file %s\n", args[startIndex+2]);
+                errorFlag = TRUE;
+            }
+            break;
+        case CP:
+            if(counter(args[startIndex+1], args[startIndex+2]) == FALSE)
+            {
+                printf("Error reading file %s\n", args[startIndex+2]);
+                errorFlag = TRUE;
+            }
+            break;
+        case SORT:
+            if(endIndex-startIndex == 1)
+            {
+                if(execlp(
+                    args[startIndex],
+                    args[startIndex],
+                    args[startIndex+1],
+                    NULL
+                    ) == -1)
+                    {
+                        printf("An error occured sorting file %s\n", args[startIndex+1]);
+                        errorFlag = TRUE;
+                    }
+            }
+            else if(endIndex-startIndex == 2)
+            {
+                if(execlp(
+                    args[startIndex],
+                    args[startIndex],
+                    args[startIndex+1],
+                    args[startIndex+2],
+                    NULL
+                    ) == -1)
+                    {
+                        printf("An error occured sorting file %s\n", args[startIndex+1]);
+                        errorFlag = TRUE;
+                    }
+            }
+            break;
+        case GREP:
+            if(endIndex-startIndex == 2)
+            {
+                if(execlp(
+                    args[startIndex],
+                    args[startIndex],
+                    args[startIndex+1],
+                    args[startIndex+2],
+                    NULL
+                    ) == -1)
+                    {
+                        printf("An error occured grepping file %s\n", args[startIndex+1]);
+                        errorFlag = TRUE;
+                    }
+            }
+            else if(endIndex-startIndex == 3)
+            {
+                if(execlp(
+                    args[startIndex],
+                    args[startIndex],
+                    args[startIndex+1],
+                    args[startIndex+2],
+                    args[startIndex+3],
+                    NULL
+                    ) == -1)
+                    {
+                        printf("An error occured grepping file %s\n", args[startIndex+1]);
+                        errorFlag = TRUE;
+                    }
+            }
+            break;
+        case MAN:
+            printManPage(args[startIndex+1]);
+            break;
+        default:
+            printf("Unknown command: %s\n", word);
+            errorFlag = TRUE;
     }
             
     return errorFlag;
