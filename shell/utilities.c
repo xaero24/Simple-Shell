@@ -1,3 +1,7 @@
+/*
+Michael Afonin, 310514997
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,6 +59,7 @@ int readFile(char* filename)
     while(s != EOF)
     {
         putchar(s);
+        s = fgetc(infile);
     }
     if (feof(infile))
     {
@@ -76,6 +81,7 @@ int counter(char* filename, char* options)
     int i;
     char s;
     FILE* infile = NULL;
+    printf("File name: %s\n", filename);
     infile = fopen(filename, "r");
     if(!infile)
         return FALSE;
@@ -144,60 +150,6 @@ int copyFiles(char* source, char* destination)
     {
         fclose(src);
         fclose(dst);
-        return FALSE;
-    }
-}
-
-/*This function provides the "pipe" action*/
-
-/*This function provides the "sort" action*/
-
-/*This function provides the "grep" action*/
-int grepFile(char* filename, char* pattern, char grepFlag)
-{
-    int lineFlag = FALSE, foundFlag = FALSE;
-    int lineCount = 0;
-    int i = 0, j = 0;
-    char s, temp[64], line[1024];
-    FILE* infile = NULL;
-    infile = fopen(filename, "r");
-    if(!infile)
-        return FALSE;
-
-    if(grepFlag == 'c') lineFlag = TRUE;
-
-    s = fgetc(infile);
-    while(s != EOF)
-    {
-        j = 0;
-        foundFlag = FALSE;
-        while(s != EOF && s != '\n')
-        {
-            i = 0;
-            while(s != ' ')
-            {
-                temp[i++] = s;
-                line[j++] = s;
-                s = fgetc(infile);
-            }
-            temp[i] = '\0';
-            line[j++] = s;
-            s = fgetc(infile);
-            if(strcmp(temp, pattern) == 0) foundFlag = TRUE;
-        }
-        if(foundFlag) lineCount++;
-        if(!lineFlag) printf("%s\n", line);
-    }
-
-    if (feof(infile))
-    {
-        if(lineFlag) printf("%d\n", lineCount);
-        fclose(infile); 
-        return TRUE;
-    }
-    else
-    {
-        fclose(infile); 
         return FALSE;
     }
 }
@@ -278,15 +230,6 @@ void printManPage(char* cmd)
             printf("  +: cp file1.txt file2.txt\n");
             printf("\n");
             printf("Two parameters are passed - the first one is the source file and the second one is the target/destination file.\n");
-            break;
-        case PIPE:
-            printf("| - pipe operator.\n");
-            printf("Takes the output of the first command as the input of the second command.\n");
-            printf("Usage example:\n");
-            printf("  +: cat file1.txt | grep Line\n");
-            printf("  Line 1\n");
-            printf("  New Line\n");
-            printf("  Line 5\n");
             break;
         case SORT:
             printf("sort - sort file lines.\n");

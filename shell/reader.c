@@ -1,3 +1,7 @@
+/*
+Michael Afonin, 310514997
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +13,8 @@ int checkInput(char *cmdLine, int paramCount, int* exitFlag)
     int i = 0, j = 0;
     int errorFlag = FALSE;
     char word[256];
+
+    paramCount = secondCountParameters(cmdLine);
     
     while(cmdLine[i] != ' ' && cmdLine[i] != '\n')
     {
@@ -67,7 +73,6 @@ int checkInput(char *cmdLine, int paramCount, int* exitFlag)
             }
             break;
         case WC:
-            /* TODO: Check input parametrs in a better way*/
             if(paramCount < 2 || paramCount > 3)
             {
                 printf("wc takes 1 possible flag and 1 parameter.\n");
@@ -99,7 +104,6 @@ int checkInput(char *cmdLine, int paramCount, int* exitFlag)
             }
             break;
         case SORT:
-            /* TODO: Check input parametrs in a better way*/
             if(paramCount < 2 || paramCount > 3)
             {
                 printf("sort takes exactly 1 parameter and 1 possible flag.\n");
@@ -108,7 +112,7 @@ int checkInput(char *cmdLine, int paramCount, int* exitFlag)
             {
                 /*Read the flag*/
                 i++;
-                if(cmdLine[i] != 'c')
+                if(cmdLine[i] != 'r')
                 {
                     printf("Bad flag passed: %c\n", cmdLine[i]);
                     errorFlag = TRUE;
@@ -181,12 +185,9 @@ int checkInput(char *cmdLine, int paramCount, int* exitFlag)
     return errorFlag;
 }
 
-
 int executeCommand(char args[10][256], int startIndex, int endIndex)
 {
-    int i = 0, j = 0;
     int errorFlag = FALSE;
-    char word[256];
 
     switch(getCommandType(args[startIndex]))
     {
@@ -222,10 +223,32 @@ int executeCommand(char args[10][256], int startIndex, int endIndex)
             }
             break;
         case WC:
-            if(counter(args[startIndex+2], args[startIndex+1]) == FALSE)
+            if(endIndex-startIndex == 1)
             {
-                printf("Error reading file %s\n", args[startIndex+2]);
-                errorFlag = TRUE;
+                if(execlp(
+                    args[startIndex],
+                    args[startIndex],
+                    args[startIndex+1],
+                    NULL
+                    ) == -1)
+                    {
+                        printf("An error occured opening file %s\n", args[startIndex+1]);
+                        errorFlag = TRUE;
+                    }
+            }
+            else if(endIndex-startIndex == 2)
+            {
+                if(execlp(
+                    args[startIndex],
+                    args[startIndex],
+                    args[startIndex+1],
+                    args[startIndex+2],
+                    NULL
+                    ) == -1)
+                    {
+                        printf("An error occured opening file %s\n", args[startIndex+2]);
+                        errorFlag = TRUE;
+                    }
             }
             break;
         case CP:
@@ -259,7 +282,7 @@ int executeCommand(char args[10][256], int startIndex, int endIndex)
                     NULL
                     ) == -1)
                     {
-                        printf("An error occured sorting file %s\n", args[startIndex+1]);
+                        printf("An error occured sorting file %s\n", args[startIndex+2]);
                         errorFlag = TRUE;
                     }
             }
@@ -299,7 +322,6 @@ int executeCommand(char args[10][256], int startIndex, int endIndex)
             printManPage(args[startIndex+1]);
             break;
         default:
-            printf("Unknown command: %s\n", word);
             errorFlag = TRUE;
     }
             

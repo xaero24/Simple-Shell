@@ -1,3 +1,7 @@
+/*
+Michael Afonin, 310514997
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,9 +9,6 @@
 #include <wait.h>
 #include "shell.h"
 
-/*
-TODO: Remove all TODOs
-*/
 
 int main(int argc, char* argv[])
 {
@@ -34,7 +35,6 @@ int main(int argc, char* argv[])
                 {
                     /*execute command*/
                     if(exitFlag == TRUE) return 2;
-                    printf("Execute command\n");
                     for(i = 0; i<words; i++)
                     {
                         if(strcmp(args[i], "|") == 0) pipeFlag = TRUE;
@@ -42,8 +42,8 @@ int main(int argc, char* argv[])
                     if(pipeFlag)
                     {
                         /*Piped command execution*/
+                        printf("Pipe is not implemented, only first command will be executed.\n");
                         errorFlag = executeCommand(args, 0, i-1);
-                        errorFlag = executeCommand(args, i+1, words-1);
                     }
                     else
                     {
@@ -57,6 +57,10 @@ int main(int argc, char* argv[])
             else
             {
                 waitpid(childPID, &status, WUNTRACED);
+                if(strcmp(args[0], "cd") == 0 && status == 0)
+                {
+                    chdir(args[1]);
+                }
                 if(status == 512) break;
             }
         }
